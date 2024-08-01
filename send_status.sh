@@ -4,8 +4,8 @@ SCRIPT_DIR="$(dirname "$0")"
 WEBHOOK_URL=$(cat $SCRIPT_DIR/discord_hook.txt)
 
 # Default values
-CONTENT="\u200b"  # Default content
-COLOR=3066993            # Default color
+CONTENT="\u200b"  # Empty Character
+COLOR=3066993     # Green
 
 # Function to display usage
 usage() {
@@ -45,13 +45,8 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-# Get the current timestamp
 CURRENT_TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
-
-# Get the UPS status
 UPS_STATUS=$(pwrstat -status)
-
-# Replace variable number of dots with a pipe character
 UPS_STATUS=$(echo "$UPS_STATUS" | sed 's/\.\{1,\}/|/g')
 
 # Parse the output using the pipe character as the delimiter
@@ -70,9 +65,9 @@ TEST_RESULT=$(echo "$UPS_STATUS" | grep "Test Result" | awk -F'|' '{print $2}' |
 LAST_POWER_EVENT=$(echo "$UPS_STATUS" | grep "Last Power Event" | awk -F'|' '{print $2}' | xargs)
 
 # Determine the emoji based on battery capacity
-if [ "${BATTERY_CAPACITY% %}" -gt 70 ]; then
+if [ "${BATTERY_CAPACITY% %}" -gt 65 ]; then
     EMOJI="🔋"
-elif [ "${BATTERY_CAPACITY% %}" -lt 50 ]; then
+elif [ "${BATTERY_CAPACITY% %}" -lt 35 ]; then
     EMOJI="🪫"
 else
     EMOJI="⚠️"
