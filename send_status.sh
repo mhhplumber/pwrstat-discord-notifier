@@ -64,13 +64,17 @@ LINE_INTERACTION=$(echo "$UPS_STATUS" | grep "Line Interaction" | awk -F'|' '{pr
 TEST_RESULT=$(echo "$UPS_STATUS" | grep "Test Result" | awk -F'|' '{print $2}' | xargs)
 LAST_POWER_EVENT=$(echo "$UPS_STATUS" | grep "Last Power Event" | awk -F'|' '{print $2}' | xargs)
 
-# Determine the emoji based on battery capacity
-if [ "${BATTERY_CAPACITY% %}" -gt 65 ]; then
-    EMOJI="🔋"
-elif [ "${BATTERY_CAPACITY% %}" -lt 35 ]; then
-    EMOJI="🪫"
+# Determine the status thumbnail based on battery capacity
+if [ "$POWER_SUPPLY" = "Utility Power" ]; then
+    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/charging-energy-battery-electricity-256.png"
+elif [ "${BATTERY_CAPACITY% %}" -gt 75 ]; then
+    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/battery-full-energy-charge-256.png"
+elif [ "${BATTERY_CAPACITY% %}" -gt 50 ]; then
+    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/battery-reduce-energy-charge-256.png"
+elif [ "${BATTERY_CAPACITY% %}" -gt 25 ]; then
+    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/battery-half-energy-charge-512.png"
 else
-    EMOJI="⚠️"
+    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/battery-low-energy-charge-512.png"
 fi
 
 # Create the JSON payload for the Discord embed
@@ -79,7 +83,10 @@ JSON_PAYLOAD=$(cat <<EOF
   "content": "$CONTENT",
   "embeds": [
     {
-      "title": "UPS Status $EMOJI",
+      "title": "UPS Status",
+      "thumbnail": {
+        "url": "$THUMBNAIL"
+      },
       "color": $COLOR,
       "fields": [
         {

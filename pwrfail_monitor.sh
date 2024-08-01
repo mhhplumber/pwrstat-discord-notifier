@@ -10,8 +10,8 @@ START_TIME=$(date +%s)
 # Function to check the UPS status
 check_ups_status() {
     OUTPUT=$(sudo pwrstat -status)
-    POWER_SUPPLY_LINE=$(echo "$OUTPUT" | grep "Power Supply by")
-    echo "$POWER_SUPPLY_LINE"
+    POWER_SUPPLY=$(echo "$OUTPUT" | grep "Power Supply by")
+    echo "$POWER_SUPPLY"
 }
 
 sudo $SCRIPT_DIR/send_status.sh \
