@@ -66,15 +66,15 @@ LAST_POWER_EVENT=$(echo "$UPS_STATUS" | grep "Last Power Event" | awk -F'|' '{pr
 
 # Determine the status thumbnail based on battery capacity
 if [ "$POWER_SUPPLY" = "Utility Power" ]; then
-    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/charging-energy-battery-electricity-256.png"
-elif [ "${BATTERY_CAPACITY% %}" -gt 75 ]; then
-    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/battery-full-energy-charge-256.png"
-elif [ "${BATTERY_CAPACITY% %}" -gt 50 ]; then
-    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/battery-reduce-energy-charge-256.png"
-elif [ "${BATTERY_CAPACITY% %}" -gt 25 ]; then
-    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/battery-half-energy-charge-512.png"
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_pwrd.png?raw=true"
+elif [ "${BATTERY_CAPACITY% %}" -gt 90 ]; then
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_100.png?raw=true"
+elif [ "${BATTERY_CAPACITY% %}" -gt 65 ]; then
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_75.png?raw=true"
+elif [ "${BATTERY_CAPACITY% %}" -gt 40 ]; then
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_50.png?raw=true"
 else
-    THUMBNAIL="https://cdn4.iconfinder.com/data/icons/essential-app-2/16/battery-low-energy-charge-512.png"
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_25.png?raw=true"
 fi
 
 # Create the JSON payload for the Discord embed
