@@ -15,7 +15,8 @@ while [ $(($(date +%s) - start_time)) -lt $max_wait_time ]; do
     if echo "$status_output" | grep -q "Test Result.*In progress"; then
         "$SCRIPT_DIR/send_status.sh" \
             --content "🔄 Test in progress 🔄" \
-            --color 4886754
+            --color 4886754 \
+            --test
         test_in_progress=true
         break
     fi
@@ -26,7 +27,8 @@ done
 if [ "$test_in_progress" = false ]; then
     "$SCRIPT_DIR/send_status.sh" \
         --content "🚫 Test failed to start. 🚫" \
-        --color 13632027
+        --color 13632027 \
+        --test
     exit 1
 fi
 
@@ -40,12 +42,14 @@ while [ $(($(date +%s) - start_time)) -lt $max_wait_time ]; do
 
         if [ "$test_timestamp" -gt "$start_time" ]; then
             "$SCRIPT_DIR/send_status.sh" \
-                --content "✅ Test passed! ✅"
+                --content "✅ Test passed! ✅" \
+                --test
             exit 0
         else
             "$SCRIPT_DIR/send_status.sh" \
                 --content "❓ Could not determine the outcome of the test. ❓" \
-                --color 16766720
+                --color 16766720 \
+                --test
             exit 1
         fi
     fi
@@ -53,7 +57,8 @@ while [ $(($(date +%s) - start_time)) -lt $max_wait_time ]; do
     if echo "$status_output" | grep -qi "Test Result.*failed\|error"; then
         "$SCRIPT_DIR/send_status.sh" \
             --content "❌ Test failed! ❌" \
-            --color 13632027
+            --color 13632027 \
+            --test
         exit 1
     fi
 
@@ -62,4 +67,5 @@ done
 
 "$SCRIPT_DIR/send_status.sh" \
     --content "❓ Could not determine the outcome of the test. ❓" \
-    --color 16766720
+    --color 16766720 \
+    --test

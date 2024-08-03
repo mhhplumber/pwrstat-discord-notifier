@@ -7,6 +7,9 @@ WEBHOOK_URL=$(cat $SCRIPT_DIR/discord_hook.txt)
 CONTENT="\u200b"  # Empty Character
 COLOR=3066993     # Green
 
+VERBOSE=false     # flag for verbose output
+TEST=false        # flag for test output
+
 # Function to display usage
 usage() {
     echo "Usage: $0 [-C content | --content content] [-c color | --color color]"
@@ -38,6 +41,14 @@ while [ "$#" -gt 0 ]; do
                 usage
             fi
             ;;
+        -v|--verbose) 
+            VERBOSE=true
+            shift
+            ;;
+        -t|--test)
+            TEST=true
+            shift
+            ;;
         *)
             echo "Error: Invalid argument '$1'."
             usage
@@ -66,15 +77,29 @@ LAST_POWER_EVENT=$(echo "$UPS_STATUS" | grep "Last Power Event" | awk -F'|' '{pr
 
 # Determine the status thumbnail based on battery capacity
 if [ "$POWER_SUPPLY" = "Utility Power" ]; then
-    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_pwrd.png?raw=true"
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_pwrd.png?raw=true&v=1"
+    UV_STRING="\nUtility Voltage: $UTILITY_VOLTAGE"
 elif [ "${BATTERY_CAPACITY% %}" -gt 90 ]; then
-    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_100.png?raw=true"
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_100.png?raw=true&v=1"
 elif [ "${BATTERY_CAPACITY% %}" -gt 65 ]; then
-    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_75.png?raw=true"
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_75.png?raw=true&v=1"
 elif [ "${BATTERY_CAPACITY% %}" -gt 40 ]; then
-    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_50.png?raw=true"
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_50.png?raw=true&v=1"
 else
-    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_25.png?raw=true"
+    THUMBNAIL="https://github.com/mhhplumber/pwrstat-discord-notifier/blob/main/icons/batt_25.png?raw=true&v=1"
+fi
+
+if [ "$LINE_INTERACTION" != "None" ]; then
+    LI_STRING="\nLine Interaction: $LINE_INTERACTION"
+fi
+
+DEVICE_INFO="Model Name: $MODEL_NAME"
+STATUS="Power Supply: $POWER_SUPPLY\nBattery Capacity: $BATTERY_CAPACITY\nRemaining Runtime: $REMAINING_RUNTIME\nLoad: $LOAD\nLast Event: $LAST_POWER_EVENT"
+if $VERBOSE; then
+    DEVICE_INFO="$DEVICE_INFO\nFirmware Number: $FIRMWARE_NUMBER\nRating Voltage: $RATING_VOLTAGE\nRating Power: $RATING_POWER"
+    STATUS="$STATUS$UV_STRING\nOutput Voltage: $OUTPUT_VOLTAGE$LI_STRING\nTest Result: $TEST_RESULT"
+elif $TEST; then
+    STATUS="$STATUS\nTest Result: $TEST_RESULT"
 fi
 
 # Create the JSON payload for the Discord embed
@@ -83,7 +108,7 @@ JSON_PAYLOAD=$(cat <<EOF
   "content": "$CONTENT",
   "embeds": [
     {
-      "title": "UPS Status",
+      "title": "UPS Status ⚡",
       "thumbnail": {
         "url": "$THUMBNAIL"
       },
@@ -91,12 +116,12 @@ JSON_PAYLOAD=$(cat <<EOF
       "fields": [
         {
           "name": "Device Information",
-          "value": "Model Name: $MODEL_NAME\nFirmware Number: $FIRMWARE_NUMBER\nRating Voltage: $RATING_VOLTAGE\nRating Power: $RATING_POWER",
+          "value": "$DEVICE_INFO",
           "inline": false
         },
         {
           "name": "Status",
-          "value": "Power Supply By: $POWER_SUPPLY\nUtility Voltage: $UTILITY_VOLTAGE\nOutput Voltage: $OUTPUT_VOLTAGE\nBattery Capacity: $BATTERY_CAPACITY\nRemaining Runtime: $REMAINING_RUNTIME\nLoad: $LOAD\nLine Interaction: $LINE_INTERACTION\nTest Result: $TEST_RESULT\nLast Power Event: $LAST_POWER_EVENT",
+          "value": "$STATUS",
           "inline": false
         },
         {
